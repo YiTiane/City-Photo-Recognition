@@ -1,0 +1,22 @@
+id,src_path,correct_label,incorrect_label_1,incorrect_label_2,ai_decision,ai_accuracy,ai_confidence
+1,https://storage.googleapis.com/ai-calibration/chicago/chicago-2.jpg,Chicago,New York,San Francisco,Chicago,70,67
+2,https://storage.googleapis.com/ai-calibration-experiment/chicago/chicago-2.jpg,Chicago,New York,San Francisco,Chicago,70,67
+3,https://storage.googleapis.com/ai-calibration/newyork/newyork-27.jpg,New York,San Francisco,Chicago,Chicago,70,71
+4,https://storage.googleapis.com/ai-calibration-experiment/newyork/newyork-27.jpg,New York,San Francisco,Chicago,Chicago,70,71
+5,https://storage.googleapis.com/ai-calibration/sanfrancisco/sanfrancisco-19.jpg,San Francisco,New York,Chicago,San Francisco,70,65
+6,https://storage.googleapis.com/ai-calibration-experiment/sanfrancisco/sanfrancisco-19.jpg,San Francisco,New York,Chicago,San Francisco,70,65
+7,https://storage.googleapis.com/ai-calibration/chicago/chicago-14.jpg,Chicago,San Francisco,New York,San Francisco,70,74
+8,https://storage.googleapis.com/ai-calibration-experiment/chicago/chicago-14.jpg,Chicago,San Francisco,New York,San Francisco,70,74
+9,https://storage.googleapis.com/ai-calibration/chicago/chicago-18.jpg,Chicago,New York,San Francisco,Chicago,70,73
+10,https://storage.googleapis.com/ai-calibration-experiment/chicago/chicago-18.jpg,Chicago,New York,San Francisco,Chicago,70,73
+11,https://storage.googleapis.com/ai-calibration/newyork/newyork-24.jpg,New York,Chicago,San Francisco,New York,70,68
+12,https://storage.googleapis.com/ai-calibration-experiment/newyork/newyork-24.jpg,New York,Chicago,San Francisco,New York,70,68
+13,https://storage.googleapis.com/ai-calibration/chicago/chicago-28.jpg,Chicago,San Francisco,New York,New York,70,75
+14,https://storage.googleapis.com/ai-calibration-experiment/chicago/chicago-28.jpg,Chicago,San Francisco,New York,New York,70,75
+15,https://storage.googleapis.com/ai-calibration/sanfrancisco/sanfrancisco-25.jpg,San Francisco,New York,Chicago,New York,70,69
+16,https://storage.googleapis.com/ai-calibration-experiment/sanfrancisco/sanfrancisco-25.jpg,San Francisco,New York,Chicago,New York,70,69
+17,https://storage.googleapis.com/ai-calibration/newyork/newyork-34.jpg,New York,Chicago,San Francisco,New York,70,72
+18,https://storage.googleapis.com/ai-calibration-experiment/newyork/newyork-34.jpg,New York,Chicago,San Francisco,New York,70,72
+19,https://storage.googleapis.com/ai-calibration/sanfrancisco/sanfrancisco-5.jpg,San Francisco,New York,Chicago,SanFrancisc,70,66
+20,https://storage.googleapis.com/ai-calibration-experiment/sanfrancisco/sanfrancisco-5.jpg,San Francisco,New York,Chicago,SanFrancisc,70,66
+,,,,
