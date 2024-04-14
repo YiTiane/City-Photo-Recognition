@@ -94,15 +94,15 @@
                        @click="updateOption(questions[currentQuestion].third_option)">{{ questions[currentQuestion].third_option }}</el-button>
 
             <div class="ai-info" v-if="optionSelected">
-              <p style="font-weight: bold; font-size: 25px; margin-top: 20px;">
-                <template v-if="isEvenQuestion">
-                  Please confirm your final confidence for this question.
-                </template>
-                <template v-else>
-                  Use the slider to rate your confidence on this question.
-                </template>
-              </p>
-              <VueSlider v-model="confidenceValue" :min="0" :max="100" :tooltip="'always'" :height="10" style="width: 60%; margin-top: 20px;"></VueSlider>
+<!--              <p style="font-weight: bold; font-size: 25px; margin-top: 20px;">-->
+<!--                <template v-if="isEvenQuestion">-->
+<!--                  Please confirm your final confidence for this question.-->
+<!--                </template>-->
+<!--                <template v-else>-->
+<!--                  Use the slider to rate your confidence on this question.-->
+<!--                </template>-->
+<!--              </p>-->
+<!--              <VueSlider v-model="confidenceValue" :min="0" :max="100" :tooltip="'always'" :height="10" style="width: 60%; margin-top: 20px;"></VueSlider>-->
               <el-button @click="confirmSelection" style="margin-top: 30px;">{{ isEvenQuestion ? 'Submit' : 'Next' }}</el-button>
             </div>
 
@@ -153,14 +153,14 @@
 import { Button, Progress, Message } from 'element-ui';
 import * as d3 from 'd3';
 import axios from 'axios';
-import VueSlider from 'vue-slider-component'
+// import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
 
 export default {
   components: {
     'el-button': Button,
     'el-progress': Progress,
-    'VueSlider': VueSlider,
+    // 'VueSlider': VueSlider,
   },
 
   data() {
@@ -369,10 +369,10 @@ export default {
     },
 
     confirmSelection() {
-      if (this.confidenceValue <= 0) {
-        this.showMessage('warning', 'You must slide the slider to rate your confidence on this question.');
-        return;
-      }
+      // if (this.confidenceValue <= 0) {
+      //   this.showMessage('warning', 'You must slide the slider to rate your confidence on this question.');
+      //   return;
+      // }
 
       if (!this.isEvenQuestion) {
         // Odd question, record user choice and confidence

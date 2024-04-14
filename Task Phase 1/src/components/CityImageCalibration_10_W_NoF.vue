@@ -12,11 +12,11 @@
         <!-- Right question and choice area -->
         <div class="question-area" v-if="!timerActive">
 
-          <div class="previous-info" v-if="isModifiedEvenQuestion">
+          <div class="previous-info" v-if="isEvenQuestion">
             <p class="ai-assist-prompt">Please answer again with AI assistance.</p>
           </div>
 
-          <div class="comparison-area" v-if="isModifiedEvenQuestion">
+          <div class="comparison-area" v-if="isEvenQuestion">
             <!-- User's previous choices -->
             <div class="user-previous-info">
               <p class="bold-text">Your Choice: <span>{{ choiceWithoutAI[questions[currentQuestion-1].src_path] }}</span></p>
@@ -33,8 +33,8 @@
 
             <!-- AI decision, accuracy and confidence index area -->
             <div class="ai-info">
-              <p v-if="currentQuestion !== 18 && currentQuestion !== 37" class="bold-text">AI Decision: <span>{{ aiDecision }}</span></p>
-              <div class="confidence-section" v-if="currentQuestion !== 18 && currentQuestion !== 37">
+              <p class="bold-text">AI Decision: <span>{{ aiDecision }}</span></p>
+              <div class="confidence-section">
                 <p class="bold-text"> AI Confidence: <span>{{ confidence }}%</span></p>
                 <div class="confidence-indicator">
                   <div class="indicator">
@@ -48,7 +48,7 @@
 
           <p>
             <span class="bold-text">
-              {{ isModifiedEvenQuestion ? 'Please confirm your final choice.' : (currentQuestion === 18 || currentQuestion === 37 ? 'Please identify the city displayed in this picture. Please select \'' + questions[currentQuestion].correct_label + '\'.' : 'Which city\'s landscape is shown in this picture?') }}
+              {{ isEvenQuestion ? 'Please confirm your final choice.' : 'Which city\'s landscape is shown in this picture?' }}
             </span>
           </p>
 
@@ -64,16 +64,15 @@
                      @click="updateOption(questions[currentQuestion].third_option)">{{ questions[currentQuestion].third_option }}</el-button>
 
           <div class="ai-info" v-if="optionSelected">
-            <p style="font-weight: bold; font-size: 25px; margin-top: 20px;"
-               v-if="currentQuestion !== 18 && currentQuestion !== 37">
-              <template v-if="isModifiedEvenQuestion">
-                Please confirm your final confidence for this question.
-              </template>
-              <template v-else>
-                Use the slider to rate your confidence on this question.
-              </template>
-            </p>
-            <VueSlider v-model="confidenceValue" :min="0" :max="100" :tooltip="'always'" :height="10" style="width: 60%; margin-top: 20px;" v-if="currentQuestion !== 18 && currentQuestion !== 37"></VueSlider>
+<!--            <p style="font-weight: bold; font-size: 25px; margin-top: 20px;">-->
+<!--              <template v-if="isEvenQuestion">-->
+<!--                Please confirm your final confidence for this question.-->
+<!--              </template>-->
+<!--              <template v-else>-->
+<!--                Use the slider to rate your confidence on this question.-->
+<!--              </template>-->
+<!--            </p>-->
+<!--            <VueSlider v-model="confidenceValue" :min="0" :max="100" :tooltip="'always'" :height="10" style="width: 60%; margin-top: 20px;"></VueSlider>-->
             <el-button @click="confirmSelection" style="margin-top: 30px;">{{ isModifiedEvenQuestion ? 'Submit' : 'Next' }}</el-button>
           </div>
 
@@ -85,7 +84,7 @@
       <div class="progress-bar" v-if="!timerActive">
         <el-progress type="line" :percentage="(Math.floor(currentQuestion / 2) / ((questions.length - 1)/2)) * 100" :show-text="false"></el-progress>
         <div class="progress-text">
-          Progress: {{ Math.floor(currentQuestion / 2) + '/' + ((questions.length - 1) / 2 - 1)}}
+          Progress: {{ Math.floor(currentQuestion / 2) + '/' + (questions.length - 1)/2}}
         </div>
       </div>
 
@@ -94,10 +93,19 @@
     <!-- Completion message -->
     <div v-else class="completion-message">
       <p class="completion-text">Well done! You have completed all the questions.</p>
-      <p class="completion-text">Please click the button to return to the Prolific to save your results.</p>
-      <p class="completion-text">Below is a summary of your performance in the quiz:</p>
-      <p class="large-text">Your final choice (with AI-assist) accuracy is: <span class="time-format">{{ userAccuracy.toFixed(2) }}%</span></p>
-      <el-button @click="goToMenu">Back to Prolific</el-button>
+<!--      <p class="large-text">AI accuracy is: <span class="time-format">70%</span></p>-->
+<!--      <p class="large-text">Your first choice (without AI-assist) accuracy is: <span class="time-format">{{ firstAttemptAccuracy.toFixed(2) }}%</span></p>-->
+<!--      <p class="large-text">Your final choice (with AI-assist) accuracy is: <span class="time-format">{{ userAccuracy.toFixed(2) }}%</span></p>-->
+<!--      <p class="large-text">{{ completionMessage.message }}<span class="time-format">{{ elapsedTime }}</span>. {{ completionMessage.bonusMessage }}</p>-->
+
+<!--      <div>-->
+<!--        <input style=" margin-right: 10px; margin-top: 20px;" type="checkbox" id="confirmCheckbox" v-model="isConfirmed">-->
+<!--        <label for="confirmCheckbox" class="large-text">Please confirm that you have read and understood the contents of this page.</label>-->
+<!--      </div>-->
+
+      <el-button style="margin-top: 30px;" @click="goToMenu">
+        Back to Survey
+      </el-button>
     </div>
 
   </div>
@@ -107,14 +115,14 @@
 import { Button, Progress, Message } from 'element-ui';
 import * as d3 from 'd3';
 import axios from 'axios';
-import VueSlider from 'vue-slider-component'
+// import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
 
 export default {
   components: {
     'el-button': Button,
     'el-progress': Progress,
-    'VueSlider': VueSlider,
+    // 'VueSlider': VueSlider,
   },
 
   data() {
@@ -131,7 +139,6 @@ export default {
       correctAnswers: 0,
       isCurrentAnswerCorrect: false,
       initialOptionsSelected: [],
-      modifiedQuestionIndex: 0,
 
       totalTime: 1800,
       minutesLeft: null,
@@ -143,6 +150,20 @@ export default {
       choiceWithAI: {},
       confidencesWithoutAI: {},
       confidencesWithAI: {},
+
+      startTime: null,
+      elapsedTime: null,
+      redirectCountdown: 0,
+
+      completionMessageData: {
+        message: '',
+        bonusMessage: ''
+      },
+
+      buttonCountdown: 10,
+      buttonCountdownInterval: null,
+      buttonDisabled: true,
+      isConfirmed: false,
       manualLabel: 'lower',
     }
   },
@@ -163,7 +184,7 @@ export default {
       this.confirmSelection();
     }
 
-    d3.csv('/database/experiment_database_lower.csv').then(data => {
+    d3.csv('/database/calibration_database_10_lower.csv').then(data => {
       this.questions = data;
       this.initialOptionsSelected = Array(this.questions.length-1).fill(null);  // 初始化 initialOptionsSelected
       if(this.questions.length > 0) this.updateQuestion();
@@ -177,16 +198,22 @@ export default {
     this.confidencesWithAI = JSON.parse(localStorage.getItem('confidencesWithAI')) || {};
 
     this.startQuizTimer();
+    this.startTime = Date.now();
   },
 
   watch: {
     currentQuestion(newVal) {
       localStorage.setItem('currentQuestion', newVal);
     },
-
     correctAnswers(newVal) {
       localStorage.setItem('correctAnswers', newVal);
-    }
+    },
+    allQuestionsCompleted(newVal) {
+      if (newVal) {
+        this.setCompletionMessage();
+        this.startButtonCountdown();
+      }
+    },
   },
 
   computed: {
@@ -197,56 +224,48 @@ export default {
     userAccuracy() {
       let correctAIAssistedAttempts = 0;
       for (let i = 0; i < this.questions.length; i++) {
-        if (i === 18 || i === 37) continue; // 跳过第11题和第28题
-
-        let modifiedIndex = this.getModifiedIndex(i);
-        if (modifiedIndex % 2 !== 0) {
+        if (i % 2 !== 0) { // This means isEvenQuestion
           let userChoice = this.choiceWithAI[this.questions[i].src_path];
           if (userChoice === this.questions[i].correct_label) {
             correctAIAssistedAttempts++;
           }
         }
       }
-      return (((correctAIAssistedAttempts) / (30)) * 100) || 0;
-      // return (correctAIAssistedAttempts / (((this.questions.length - 1) / 2)) * 100) || 0;
+      return ((correctAIAssistedAttempts / (10)) * 100) || 0;
     },
 
     // Compute first attempt accuracy
     firstAttemptAccuracy() {
       let correctFirstAttempts = 0;
       for (let i = 0; i < this.questions.length; i++) {
-        if (i === 18 || i === 37) continue; // 跳过第11题和第28题
-
-        let modifiedIndex = this.getModifiedIndex(i);
-        if (modifiedIndex % 2 === 0) {
+        if (i % 2 === 0) { // This means !isEvenQuestion
           let userChoice = this.choiceWithoutAI[this.questions[i].src_path];
           if (userChoice === this.questions[i].correct_label) {
             correctFirstAttempts++;
           }
         }
       }
-      return (((correctFirstAttempts) / (30)) * 100) || 0;
-      // return (correctFirstAttempts / (((this.questions.length - 1) / 2)) * 100) || 0;
+      return ((correctFirstAttempts / (10)) * 100) || 0;
     },
 
     isEvenQuestion() {
-      return this.currentQuestion % 2 !== 0 && this.currentQuestion !== 18 && this.currentQuestion !== 37;
-    },
-
-    isModifiedEvenQuestion() {
-      return this.modifiedQuestionIndex % 2 !== 0 && this.currentQuestion !== 18 && this.currentQuestion !== 37;
+      return this.currentQuestion % 2 !== 0;
     },
 
     previousConfidence() {
       const confidenceString = this.confidencesWithoutAI[this.questions[this.currentQuestion - 1].src_path];
       return confidenceString ? parseInt(confidenceString) : 0;
     },
+
+    completionMessage() {
+      return this.completionMessageData;
+    },
   },
 
   methods: {
     updateOption(option) {
 
-      // if(this.currentQuestion % 2 === 0 && this.currentQuestion !== 10 && this.currentQuestion !== 27) {
+      // if(this.currentQuestion % 2 === 0) {
       //   this.$set(this.choiceWithoutAI, this.questions[this.currentQuestion].src_path, option);
       //   localStorage.setItem('choiceWithoutAI', JSON.stringify(this.choiceWithoutAI));
       // } else {
@@ -258,17 +277,6 @@ export default {
       localStorage.setItem('unconfirmedAnswer', option);
     },
 
-    getModifiedIndex(index) {
-      // 调整索引以跳过第11题和第28题
-      if (index < 18) {
-        return index;
-      } else if (index >= 18 && index < 37) {
-        return index - 1;
-      } else if (index >= 37) {
-        return index - 2;
-      }
-    },
-
     showMessage(type, msg) {
       Message({
         message: msg,
@@ -277,12 +285,12 @@ export default {
     },
 
     confirmSelection() {
-      if (this.confidenceValue <= 0 && this.currentQuestion !== 18 && this.currentQuestion !== 37) {
-        this.showMessage('warning', 'You must slide the slider to rate your confidence on this question.');
-        return;
-      }
+      // if (this.confidenceValue <= 0) {
+      //   this.showMessage('warning', 'You must slide the slider to rate your confidence on this question.');
+      //   return;
+      // }
 
-      if (!this.isModifiedEvenQuestion) {
+      if (!this.isEvenQuestion) {
         // Odd question, record user choice and confidence
         this.$set(this.choiceWithoutAI, this.questions[this.currentQuestion].src_path, this.optionSelected);
         localStorage.setItem('choiceWithoutAI', JSON.stringify(this.choiceWithoutAI));
@@ -293,7 +301,7 @@ export default {
 
         this.confidenceValue = 0;
         this.nextQuestion();
-      } else if (this.isModifiedEvenQuestion){
+      } else {
         // Even question, check if the selected option is correct
         if (this.optionSelected === this.questions[this.currentQuestion].correct_label) {
           this.isCurrentAnswerCorrect = true;
@@ -305,7 +313,7 @@ export default {
           this.startCountdown();
         }
 
-        if (this.optionSelected === this.questions[this.currentQuestion].correct_label && this.currentQuestion !== 18 && this.currentQuestion !== 37) {
+        if (this.optionSelected === this.questions[this.currentQuestion].correct_label) {
           this.correctAnswers++;
         }
 
@@ -320,14 +328,6 @@ export default {
 
     nextQuestion() {
       this.currentQuestion++;
-
-      if (this.currentQuestion < 18) {
-        this.modifiedQuestionIndex = this.currentQuestion;
-      } else if (this.currentQuestion >= 18 && this.currentQuestion < 37) {
-        this.modifiedQuestionIndex = this.currentQuestion - 1;
-      } else if (this.currentQuestion >= 37) {
-        this.modifiedQuestionIndex = this.currentQuestion - 2;
-      }
 
       this.optionSelected = '';
       this.hover = false;
@@ -396,31 +396,94 @@ export default {
     beforeDestroy() {
       clearInterval(this.timer);
       clearInterval(this.countdownTimer);
+      if (this.buttonCountdownInterval) {
+        clearInterval(this.buttonCountdownInterval);
+      }
+    },
+
+    calculateElapsedTime() {
+      const endTime = Date.now();
+      const elapsedTime = endTime - this.startTime;
+      const minutes = Math.floor(elapsedTime / 60000);
+      const seconds = ((elapsedTime % 60000) / 1000).toFixed(0);
+      return minutes + "min " + (seconds < 10 ? '0' : '') + seconds + "s";
+    },
+
+    setCompletionMessage() {
+      // Call the method to update the elapsed time
+      this.elapsedTime = this.calculateElapsedTime();
+
+      // Convert elapsedTime to seconds for comparison
+      const elapsedSeconds = this.convertToSeconds(this.elapsedTime);
+
+      const finalAccuracy = parseFloat(this.userAccuracy.toFixed(2));
+      this.completionMessageData.message = `Your total quiz duration was: `;
+
+      this.completionMessageData.bonusMessage = elapsedSeconds < 300 && finalAccuracy > 70 ?
+          "Congratulations, you have received a bonus." :
+          "Unfortunately, you did not receive a bonus.";
+    },
+
+    convertToSeconds(timeString) {
+      const [min, sec] = timeString.split(/min |s/).map(Number);
+      return min * 60 + sec;
+    },
+
+    checkBonusReceived() {
+      return this.userAccuracy > 70 && this.convertToSeconds(this.elapsedTime) < 780;
+    },
+
+    startButtonCountdown() {
+      this.buttonCountdownInterval = setInterval(() => {
+        if (this.buttonCountdown > 0) {
+          this.buttonCountdown--;
+        } else {
+          this.buttonDisabled = false;
+          clearInterval(this.buttonCountdownInterval);
+          this.buttonCountdownInterval = null;
+        }
+      }, 1000);
+    },
+
+    startRedirectCountdown() {
+      let countdownInterval = setInterval(() => {
+        if (this.redirectCountdown <= 0) {
+          clearInterval(countdownInterval);
+          this.goToMenu();
+        } else {
+          this.redirectCountdown--;
+        }
+      }, 1000);
     },
 
     goToMenu() {
+      // Check if the button is disabled
 
-      localStorage.setItem('stage', 3);
       localStorage.setItem('currentQuestion', 0);
       localStorage.setItem('correctAnswers', 0);
 
       this.confidencesWithAI['manualLabel'] = this.manualLabel;
 
-      Promise.all([
-        axios.post('https://ai-calibration-backend-da61b7d9f154.herokuapp.com/api/experiment', {
-          // axios.post('http://localhost:3001/api/experiment', {
-          userId: localStorage.getItem('userId'),
-          firstAccuracy: this.firstAttemptAccuracy.toFixed(2),
-          finalAccuracy: this.userAccuracy.toFixed(2),
-          choiceWithoutAI: this.choiceWithoutAI,
-          choiceWithAI: this.choiceWithAI,
-          confidencesWithoutAI: this.confidencesWithoutAI,
-          confidencesWithAI: this.confidencesWithAI
-        })
-      ]).then(results => {
+      const PROLIFIC_PID = localStorage.getItem('userId') || 'defaultUserId';
+      const qualtricsUrl = `https://nus.syd1.qualtrics.com/jfe/form/SV_5j3XsOn4oKS6OcS/?PROLIFIC_PID=${PROLIFIC_PID}`;
+
+
+      axios.post('https://ai-calibration-backend-da61b7d9f154.herokuapp.com/api/calibration_10_NoF', {
+        // axios.post('http://localhost:3001/api/calibration', {
+        userId: localStorage.getItem('userId'),
+        firstAccuracy: this.firstAttemptAccuracy.toFixed(2),
+        finalAccuracy: this.userAccuracy.toFixed(2),
+        choiceWithoutAI: this.choiceWithoutAI,
+        choiceWithAI: this.choiceWithAI,
+        confidencesWithoutAI: this.confidencesWithoutAI,
+        confidencesWithAI: this.confidencesWithAI,
+        elapsedTime: this.convertToSeconds(this.elapsedTime),
+        bonusReceived: this.checkBonusReceived()
+      }).then(results => {
         console.log('All requests finished', results);
+        window.location.href = qualtricsUrl;
         localStorage.clear();
-        window.location.href = "https://app.prolific.com/submissions/complete?cc=C107K044";
+        // this.$router.push('/');
       }).catch(error => {
         console.error(error);
       });
